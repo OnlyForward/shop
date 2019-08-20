@@ -1,7 +1,5 @@
 const express = require('express');
-const session = require('express-session');
 const boydParser = require('body-parser');
-const MongoDbStore = require('connect-mongodb-session')(session);
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
@@ -14,7 +12,6 @@ const shop = require('./routes/shop');
 //<password>
 let connectionString = "mongodb+srv://DimaSh:75891234@cluster0-rhhiy.mongodb.net/test?retryWrites=true&w=majority";
 
-app.use(session({ secret: 'my_secret', resave: false, saveUninitialized: false }));
 app.use(boydParser.urlencoded({ extended: false }));
 app.use(boydParser.json());
 app.use(express.static(path.join(__dirname, 'images')));
@@ -22,7 +19,7 @@ app.use(express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origiin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'Delete, Post, Put, Patch');
+    res.setHeader('Access-Control-Allow-Methods', 'Delete, Get, Put, Patch');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authentication');
     next()
 });
@@ -46,31 +43,18 @@ const fileFilter = (req, file, cb) => {
     }
 }
 
-multer({ storage: fileSorage, fileFilter: fileFilter });
-
-// const store = new MongoDBStore({
-//     uri: MongoDbUri,
-//     collection: 'sessions'
-// });
-
-app.use((req, res, next) => {
-    if (!req.session.user) {
-        console.log('is logged in')
-        return next();
-    }
-    console.log(req.session.user._id);
-    User.findById(req.session.user._id).then(user => {
-        req.user = user;
-        next();
-    }).catch(err => console.log(err));
-});
+multer({ storage: fileSorage, fileFilter: fileFilter }).single('image');
 
 app.use('/auth',auth);
 app.use(shop);
 
-app.use((error, req, res, next) => {
+app.use((err, req, res, next) => {
     console.log('пришел в общий обработчик ошибок');
-    res.json({ mistake: 'пришел в общий обработчик ошибок' });
+    const statusCode = err.statusCode || 500;
+    const message = err.message;
+    res.status(statusCode).json({
+        message: message
+    })
 })
 
 mongoose.connect(connectionString).then(result => {

@@ -18,8 +18,8 @@ app.use(express.static(path.join(__dirname, 'images')));
 
 
 app.use((req,res,next)=>{
-    res.setHeader('Access-Control-Allow-Origiin','*');
-    res.setHeader('Access-Control-Allow-Methods','Delete, Post, Put, Patch');
+    res.setHeader('Access-Control-Allow-Origin','*');
+    res.setHeader('Access-Control-Allow-Methods','Delete, Post, PUT, Patch');
     res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');
 
     next()

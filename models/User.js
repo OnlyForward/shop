@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 
 const User = new Schema({
-    mail:{
+    email:{
         required:true,
         type:String
     },
@@ -17,7 +17,6 @@ const User = new Schema({
         required:true
     },
     bucket:{
-        required:true,
         type:Schema.Types.ObjectId,
         ref:'Bucket'
     }

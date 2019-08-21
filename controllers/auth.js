@@ -1,11 +1,22 @@
 const User = require('../models/User');
 const Bucket = require('../models/Bucket');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator/check')
 
 exports.signUp = async (req,res,next)=>{
-    const password = req.body.password;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        const error = new Error('Validation failed');
+        error.statusCode = 422;
+        error.data = errors.array();
+        throw error;
+    }
+
+    const password = req.body.password1;
     const login = req.body.login;
-    const confirmPassword = req.body.confirmPassword;
+    const confirmPassword = req.body.password2;
     const email = req.body.email;
 
     try{
@@ -28,6 +39,7 @@ exports.signUp = async (req,res,next)=>{
     })
 
     const result = await user.save();
+
     res.json({result: result});
     }catch(err){
         err.statusCode = 500;
@@ -38,26 +50,33 @@ exports.signUp = async (req,res,next)=>{
 exports.login = async (req,res,next)=>{
     const password = req.body.password;
     const email = req.body.email;
-
+    let loadedUser = null;
     try{
         const user = await User.find({email:email});
         if(!user){
             const err = new Error('Не существует пользователь с таким email');
+            err.statusCode = 401;
             throw err;
         }
-
+        loadedUser = user;
         const result = await bcrypt.compare(password,user.password);
         console.log(`result of bcrypt compare ${result}`)
         if(!result){
             const err =  new Error('Неверный логин или пароль');
+            err.statusCode = 401;
             throw err;
         }
-
-        req.session = true;
-        req.isLoggedin = true;
-        res.json({rseult:'You logged in'})
+        const token = jwt.sign({
+            email: loadedUser.email,
+            userId: loadedUser._id.toString()
+        },
+            'secret',
+            { expiresIn: '1h' });
+        res.status(200).json({ token: token, userId: loadedUser._id.toString() });
     }catch(err){
-        err.statusCode = 500;
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
         next(err);
     }
 }
@@ -80,7 +99,7 @@ exports.getBucket = async (req,res,next)=>{
 exports.addToBucket = async (req,res,next)=>{
     const productId = req.body.productId;
     const userId = req.userId;
-
+// io.getIo().emit('posts', { action: 'delete', post: postId });
     try{
         const bucket = await Bucket.find({userId:userId});
         const result = await bucket.addToBucket(productId);

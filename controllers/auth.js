@@ -33,7 +33,6 @@ exports.signUp = async (req,res,next)=>{
         err.statusCode = 500;
         next(err);
     }
-
 }
 
 exports.login = async (req,res,next)=>{

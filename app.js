@@ -4,6 +4,8 @@ const boydParser = require('body-parser');
 const MongoDbStore = require('connect-mongodb-session')(session);
 const path = require('path');
 const multer = require('multer');
+const authRoutes = require('./routes/auth');
+const shopRoutes = require('./routes/shop');
 const app = express();
 
 
@@ -16,7 +18,7 @@ app.use(express.static(path.join(__dirname, 'images')));
 app.use((req,res,next)=>{
     res.setHeader('Access-Control-Allow-Origiin','*');
     res.setHeader('Access-Control-Allow-Methods','Delete, Post, Put, Patch');
-    res.setHeader('Access-Control-Allow-Headers','Content-Type, Authentication');
+    res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');
     next()
 });
 
@@ -39,12 +41,15 @@ const fileFilter = (req,file,cb)=>{
         }
 }
 
-multer({storage:fileSorage});
+multer({storage:fileSorage, fileFilter: fileFilter});
 
 const store = new MongoDBStore({
     uri: MongoDbUri,
     collection: 'sessions'
 });
+
+app.use('/auth',authRoutes);
+app.use(shopRoutes);
 
 app.use((req, res, next) => {
     if (!req.session.user) {
@@ -64,14 +69,4 @@ app.use((error,req,res,next)=>{
     res.json({mistake:'пришел в общий обработчик ошибок'});
 })
 
-//только для с папкой views
-// app.use((req, res, next) => {
-//     res.locals.authenticated = req.session.isLoggedIn;
-//     res.locals.csrfToken = req.csrfToken();
-//     next();
-// });
-// app.use((err,req,res,next)=>{
-
-// });
-
-app.listen(3000);
+app.listen(8080);

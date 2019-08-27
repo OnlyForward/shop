@@ -1,8 +1,14 @@
 const Products = require('../models/Product');
 
 exports.getProducts = async (req, res, next) => {
+    let query = req.query.product;
+    console.log(query);
     try {
-        const products = await Products.find();
+        let products;
+        if (query) {
+            products = await Products.find({ "title": { $regex: query, $options: "i" } });
+            console.log(products);
+        }
         if (!products) {
             const err = new Error('Нет товаров');
             err.statusCode = 422;

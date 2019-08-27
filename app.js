@@ -63,7 +63,7 @@ app.use((err, req, res, next) => {
 
 
 mongoose.connect(connectionString).then(result => {
-    console.log(result);
+    // console.log(result.docs);
     const server = app.listen(8080);
 }).catch(err=>{
     console.log(err);

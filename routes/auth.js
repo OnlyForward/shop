@@ -7,7 +7,7 @@ const User = require('../models/User');
 
 
 router.put('/signup',  authController.signUp);
-router.get('/login', isAuth, authController.login);
+router.post('/login', authController.login);
 router.get('/bucket', isAuth, authController.getBucket);
 router.post('/bucket', isAuth, authController.addToBucket);
 router.delete('/bucket', isAuth, authController.removeFromBucket);

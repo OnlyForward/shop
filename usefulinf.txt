@@ -1,0 +1,2 @@
+https://stackoverflow.com/questions/43766178/loading-data-into-mongodb-atlas-using-python
+https://www.geeksforgeeks.org/reading-excel-file-using-python/
